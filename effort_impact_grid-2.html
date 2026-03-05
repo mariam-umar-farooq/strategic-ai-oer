@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Effort vs. Impact Grid — ERUA Social Entrepreneurship Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF;
+    --surface: #FFFFFF;
+    --ink: #1A1A1A;
+    --ink-light: #6B6560;
+    --accent: #2D6A4F;
+    --accent-light: #D8F3DC;
+    --warn: #E07A5F;
+    --warn-light: #FDE8E3;
+    --border: #E2DDD8;
+    --q1: #D8F3DC; /* high impact, low effort — quick wins */
+    --q2: #FFF8E1; /* high impact, high effort — strategic */
+    --q3: #F0F0F0; /* low impact, low effort — low priority */
+    --q4: #FDE8E3; /* low impact, high effort — reconsider */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  .container { max-width: 780px; margin: 0 auto; }
+
+  .header {
+    margin-bottom: 32px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(26px, 4vw, 38px);
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    max-width: 560px;
+  }
+
+  /* Two-column layout */
+  .workspace {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 640px) {
+    .workspace { grid-template-columns: 1fr; }
+  }
+
+  /* Grid */
+  .grid-wrap {
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  .axis-label-top {
+    display: flex;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .axis-arrow { font-size: 14px; }
+
+  .grid-and-yaxis {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .y-axis-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 6px;
+    width: 100%;
+    aspect-ratio: 1;
+    min-height: 340px;
+  }
+
+  .quadrant {
+    border-radius: 10px;
+    padding: 12px;
+    position: relative;
+    min-height: 160px;
+    transition: box-shadow 0.2s;
+  }
+
+  .quadrant.drag-over {
+    box-shadow: 0 0 0 2.5px var(--accent);
+  }
+
+  .q-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .q-desc {
+    font-size: 10px;
+    color: var(--ink-light);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+
+  .q1 { background: var(--q1); }
+  .q1 .q-label { color: #1B4332; }
+
+  .q2 { background: var(--q2); }
+  .q2 .q-label { color: #78500A; }
+
+  .q3 { background: var(--q3); }
+  .q3 .q-label { color: #555; }
+
+  .q4 { background: var(--q4); }
+  .q4 .q-label { color: #7B2D1E; }
+
+  .q-cards { display: flex; flex-direction: column; gap: 6px; }
+
+  /* Cards */
+  .card {
+    background: white;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    cursor: grab;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: box-shadow 0.15s, transform 0.15s, opacity 0.15s;
+    user-select: none;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+
+  .card:active { cursor: grabbing; }
+
+  .card.dragging {
+    opacity: 0.4;
+    transform: scale(0.97);
+  }
+
+  .card-emoji {
+    font-size: 13px;
+    margin-right: 4px;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    animation: fadeUp 0.5s 0.15s ease both;
+  }
+
+  .sidebar-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 10px;
+  }
+
+  .unplaced-pool {
+    background: var(--surface);
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    min-height: 120px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    transition: box-shadow 0.2s;
+  }
+
+  .unplaced-pool.drag-over {
+    box-shadow: 0 0 0 2px var(--accent);
+    border-color: var(--accent);
+  }
+
+  .pool-hint {
+    font-size: 12px;
+    color: #C5BFB9;
+    text-align: center;
+    padding: 16px 0;
+    display: none;
+  }
+
+  .unplaced-pool:empty .pool-hint,
+  .unplaced-pool.empty .pool-hint { display: block; }
+
+  /* Add custom */
+  .add-section {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+
+  .add-section label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .add-input {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 10px;
+    outline: none;
+    color: var(--ink);
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+
+  .add-input:focus { border-color: var(--accent); }
+
+  .emoji-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .emoji-btn {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .emoji-btn:hover, .emoji-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .btn-add {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px;
+    border-radius: 7px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-add:hover { background: #235C40; }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: #235C40; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink-light);
+    border: 1.5px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--ink-light); color: var(--ink); }
+
+  /* Legend */
+  .legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--ink-light);
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* Axis labels bottom */
+  .x-axis-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    padding: 0 4px;
+  }
+
+  .x-axis-label {
+    font-size: 10px;
+    color: var(--ink-light);
+    font-weight: 500;
+  }
+
+  /* Footer */
+  .footer-note {
+    margin-top: 36px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--ink-light);
+    line-height: 1.6;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Drag ghost fix */
+  .drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.85;
+    transform: rotate(2deg) scale(1.04);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="tag">Unit 2 · Where AI Can Help</div>
+    <h1>Effort vs. Impact Grid</h1>
+    <p class="subtitle">Drag each AI use case into the quadrant that best matches your venture's context. Your grid is yours alone — nothing is shared. Add your own use cases using the panel on the right.</p>
+  </div>
+
+  <div class="workspace">
+
+    <!-- Grid -->
+    <div class="grid-wrap">
+      <div class="axis-label-top">
+        <span class="axis-arrow">↑</span> High Impact
+      </div>
+      <div class="grid-and-yaxis">
+        <div class="y-axis-label">
+          <span>High Effort ↑</span>
+        </div>
+        <div style="flex:1">
+          <div class="grid" id="grid">
+            <div class="quadrant q2" id="q-strategic" ondragover="onDragOver(event,'q-strategic')" ondragleave="onDragLeave(event,'q-strategic')" ondrop="onDrop(event,'q-strategic')">
+              <div class="q-label">Strategic Investments</div>
+              <div class="q-desc">Worth planning carefully — high payoff, needs resources</div>
+              <div class="q-cards" id="cards-q-strategic"></div>
+            </div>
+            <div class="quadrant q1" id="q-quickwins" ondragover="onDragOver(event,'q-quickwins')" ondragleave="onDragLeave(event,'q-quickwins')" ondrop="onDrop(event,'q-quickwins')">
+              <div class="q-label">✓ Quick Wins</div>
+              <div class="q-desc">Do these first — high impact, low effort</div>
+              <div class="q-cards" id="cards-q-quickwins"></div>
+            </div>
+            <div class="quadrant q4" id="q-reconsider" ondragover="onDragOver(event,'q-reconsider')" ondragleave="onDragLeave(event,'q-reconsider')" ondrop="onDrop(event,'q-reconsider')">
+              <div class="q-label">Reconsider</div>
+              <div class="q-desc">High effort, low return — skip for now</div>
+              <div class="q-cards" id="cards-q-reconsider"></div>
+            </div>
+            <div class="quadrant q3" id="q-lowpriority" ondragover="onDragOver(event,'q-lowpriority')" ondragleave="onDragLeave(event,'q-lowpriority')" ondrop="onDrop(event,'q-lowpriority')">
+              <div class="q-label">Low Priority</div>
+              <div class="q-desc">Easy but minimal impact — revisit later</div>
+              <div class="q-cards" id="cards-q-lowpriority"></div>
+            </div>
+          </div>
+          <div class="x-axis-row">
+            <span class="x-axis-label">← High Effort</span>
+            <span class="x-axis-label">Low Effort →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#2D6A4F"></div>Quick Wins — start here</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#F0B429"></div>Strategic — plan carefully</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#AAA"></div>Low priority — defer</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#E07A5F"></div>Reconsider — not worth it yet</div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-title">Use Cases to Place</div>
+
+      <div class="unplaced-pool" id="pool"
+        ondragover="onDragOver(event,'pool')"
+        ondragleave="onDragLeave(event,'pool')"
+        ondrop="onDrop(event,'pool')">
+        <div class="pool-hint">All placed! Add more below ↓</div>
+      </div>
+
+      <div class="add-section">
+        <label>Add your own use case</label>
+        <input class="add-input" id="customText" placeholder="e.g. Translating donor reports…" maxlength="60">
+        <div class="emoji-row" id="emojiRow">
+          <button class="emoji-btn selected" data-emoji="📋" onclick="selectEmoji(this)">📋</button>
+          <button class="emoji-btn" data-emoji="✉️" onclick="selectEmoji(this)">✉️</button>
+          <button class="emoji-btn" data-emoji="📊" onclick="selectEmoji(this)">📊</button>
+          <button class="emoji-btn" data-emoji="🤝" onclick="selectEmoji(this)">🤝</button>
+          <button class="emoji-btn" data-emoji="🌍" onclick="selectEmoji(this)">🌍</button>
+          <button class="emoji-btn" data-emoji="📱" onclick="selectEmoji(this)">📱</button>
+          <button class="emoji-btn" data-emoji="🔍" onclick="selectEmoji(this)">🔍</button>
+          <button class="emoji-btn" data-emoji="💬" onclick="selectEmoji(this)">💬</button>
+        </div>
+        <button class="btn-add" onclick="addCustom()">+ Add to Pool</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="exportGrid()">↓ Export My Grid</button>
+        <button class="btn btn-secondary" onclick="resetGrid()">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <strong>Your privacy:</strong> Nothing you enter is stored or shared. This grid lives entirely in your browser session.
+    <br><br>
+    Part of the <em>Strategic AI Integration</em> self-learning module · ERUA Social Entrepreneurship Lab · Prepared by Mariam Umar Farooq
+  </div>
+
+</div>
+
+<script>
+  let draggedId = null;
+  let selectedEmoji = '📋';
+
+  const defaultCards = [
+    { id: 'c1', emoji: '✉️', text: 'Drafting grant proposals' },
+    { id: 'c2', emoji: '📣', text: 'Writing social media posts' },
+    { id: 'c3', emoji: '📊', text: 'Analysing beneficiary survey data' },
+    { id: 'c4', emoji: '🗒️', text: 'Auto-transcribing meeting notes' },
+    { id: 'c5', emoji: '🌍', text: 'Translating reports for partners' },
+    { id: 'c6', emoji: '📋', text: 'Organising institutional knowledge' },
+    { id: 'c7', emoji: '💌', text: 'Personalising donor outreach emails' },
+    { id: 'c8', emoji: '🔎', text: 'Identifying funding opportunities' },
+  ];
+
+  const borderColors = {
+    'q-quickwins': '#2D6A4F',
+    'q-strategic': '#F0B429',
+    'q-lowpriority': '#AAA',
+    'q-reconsider': '#E07A5F',
+    'pool': '#C5BFB9'
+  };
+
+  // Card registry: id -> { emoji, text, location }
+  const cardRegistry = {};
+
+  function init() {
+    defaultCards.forEach(c => {
+      cardRegistry[c.id] = { ...c, location: 'pool' };
+    });
+    renderAll();
+  }
+
+  function renderAll() {
+    // Clear containers
+    ['pool','q-quickwins','q-strategic','q-lowpriority','q-reconsider'].forEach(loc => {
+      const el = loc === 'pool' ? document.getElementById('pool') : document.getElementById('cards-' + loc);
+      if (el) el.innerHTML = '';
+    });
+
+    // Render each card in its location
+    Object.values(cardRegistry).forEach(card => {
+      const el = createCardEl(card);
+      placeCard(el, card.location);
+    });
+
+    // Show hint if pool is empty
+    const pool = document.getElementById('pool');
+    const hasCards = Object.values(cardRegistry).some(c => c.location === 'pool');
+    pool.classList.toggle('empty', !hasCards);
+    if (!hasCards) {
+      const hint = document.createElement('div');
+      hint.className = 'pool-hint';
+      hint.textContent = 'All placed! Add more below ↓';
+      hint.style.display = 'block';
+      pool.appendChild(hint);
+    }
+  }
+
+  function createCardEl(card) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.draggable = true;
+    div.id = 'card-' + card.id;
+    div.style.borderLeftColor = borderColors[card.location] || '#C5BFB9';
+    div.innerHTML = `<span class="card-emoji">${card.emoji}</span>${card.text}`;
+    div.addEventListener('dragstart', e => onDragStart(e, card.id));
+    div.addEventListener('dragend', onDragEnd);
+    // Touch support
+    div.addEventListener('touchstart', e => touchStart(e, card.id), {passive:true});
+    div.addEventListener('touchmove', touchMove, {passive:false});
+    div.addEventListener('touchend', touchEnd);
+    return div;
+  }
+
+  function placeCard(el, location) {
+    const container = location === 'pool'
+      ? document.getElementById('pool')
+      : document.getElementById('cards-' + location);
+    if (container) container.appendChild(el);
+  }
+
+  // Drag events
+  function onDragStart(e, id) {
+    draggedId = id;
+    setTimeout(() => {
+      const el = document.getElementById('card-' + id);
+      if (el) el.classList.add('dragging');
+    }, 0);
+  }
+
+  function onDragEnd(e) {
+    if (draggedId) {
+      const el = document.getElementById('card-' + draggedId);
+      if (el) el.classList.remove('dragging');
+    }
+  }
+
+  function onDragOver(e, target) {
+    e.preventDefault();
+    const el = target === 'pool' ? document.getElementById('pool') : document.getElementById(target);
+    if (el) el.classList.add('drag-over');
+  }
+
+  function onDragLeave(e, target) {
+    const el = target === 'pool' ? document.getElementById('pool') : document.getElementById(target);
+    if (el) el.classList.remove('drag-over');
+  }
+
+  function onDrop(e, target) {
+    e.preventDefault();
+    const el = target === 'pool' ? document.getElementById('pool') : document.getElementById(target);
+    if (el) el.classList.remove('drag-over');
+    if (!draggedId) return;
+    cardRegistry[draggedId].location = target;
+    renderAll();
+    draggedId = null;
+  }
+
+  // Touch drag support
+  let touchCardId = null;
+  let ghost = null;
+
+  function touchStart(e, id) {
+    touchCardId = id;
+  }
+
+  function touchMove(e) {
+    e.preventDefault();
+    if (!touchCardId) return;
+    const touch = e.touches[0];
+    if (!ghost) {
+      const orig = document.getElementById('card-' + touchCardId);
+      ghost = orig.cloneNode(true);
+      ghost.className = 'card drag-ghost';
+      ghost.style.width = orig.offsetWidth + 'px';
+      document.body.appendChild(ghost);
+    }
+    ghost.style.left = (touch.clientX - 60) + 'px';
+    ghost.style.top = (touch.clientY - 20) + 'px';
+
+    // Highlight target
+    ['pool','q-quickwins','q-strategic','q-lowpriority','q-reconsider'].forEach(loc => {
+      const container = loc === 'pool' ? document.getElementById('pool') : document.getElementById(loc);
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const inside = touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                     touch.clientY >= rect.top && touch.clientY <= rect.bottom;
+      container.classList.toggle('drag-over', inside);
+    });
+  }
+
+  function touchEnd(e) {
+    if (ghost) { ghost.remove(); ghost = null; }
+    if (!touchCardId) return;
+    const touch = e.changedTouches[0];
+
+    let dropped = false;
+    ['pool','q-quickwins','q-strategic','q-lowpriority','q-reconsider'].forEach(loc => {
+      const container = loc === 'pool' ? document.getElementById('pool') : document.getElementById(loc);
+      if (!container) return;
+      container.classList.remove('drag-over');
+      const rect = container.getBoundingClientRect();
+      if (!dropped && touch.clientX >= rect.left && touch.clientX <= rect.right &&
+          touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        cardRegistry[touchCardId].location = loc;
+        dropped = true;
+      }
+    });
+
+    renderAll();
+    touchCardId = null;
+  }
+
+  // Add custom card
+  function selectEmoji(btn) {
+    document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedEmoji = btn.dataset.emoji;
+  }
+
+  function addCustom() {
+    const input = document.getElementById('customText');
+    const text = input.value.trim();
+    if (!text) { input.focus(); return; }
+    const id = 'custom-' + Date.now();
+    cardRegistry[id] = { id, emoji: selectedEmoji, text, location: 'pool' };
+    input.value = '';
+    renderAll();
+  }
+
+  document.getElementById('customText').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addCustom();
+  });
+
+  // Export
+  function exportGrid() {
+    const quadrantNames = {
+      'q-quickwins': 'QUICK WINS (High Impact, Low Effort)',
+      'q-strategic': 'STRATEGIC INVESTMENTS (High Impact, High Effort)',
+      'q-lowpriority': 'LOW PRIORITY (Low Impact, Low Effort)',
+      'q-reconsider': 'RECONSIDER (Low Impact, High Effort)',
+      'pool': 'NOT YET PLACED'
+    };
+
+    let text = 'EFFORT VS. IMPACT GRID — MY AI USE CASES\n';
+    text += `Date: ${new Date().toLocaleDateString('en-GB')}\n\n`;
+    text += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+    Object.entries(quadrantNames).forEach(([loc, label]) => {
+      const cards = Object.values(cardRegistry).filter(c => c.location === loc);
+      if (cards.length === 0) return;
+      text += `${label}\n`;
+      cards.forEach(c => { text += `  ${c.emoji} ${c.text}\n`; });
+      text += '\n';
+    });
+
+    text += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    text += 'My next step: Focus on Quick Wins first.\n\n';
+    text += 'Part of the Strategic AI Integration module · ERUA Social Entrepreneurship Lab\n';
+    text += 'Prepared by Mariam Umar Farooq\n';
+
+    try {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Effort-Impact-Grid-${new Date().toISOString().slice(0,10)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch(e) {
+      const encoded = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+      const a = document.createElement('a');
+      a.href = encoded;
+      a.download = `Effort-Impact-Grid-${new Date().toISOString().slice(0,10)}.txt`;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
+
+  function resetGrid() {
+    if (!confirm('Reset all cards to starting position?')) return;
+    Object.keys(cardRegistry).forEach(id => {
+      if (id.startsWith('custom-')) {
+        delete cardRegistry[id];
+      } else {
+        cardRegistry[id].location = 'pool';
+      }
+    });
+    renderAll();
+  }
+
+  init();
+</script>
+</body>
+</html>
