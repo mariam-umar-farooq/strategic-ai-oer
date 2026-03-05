@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Check — Strategic AI Integration</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF;
+    --surface: #FFFFFF;
+    --ink: #1A1A1A;
+    --ink-light: #6B6560;
+    --accent: #2D6A4F;
+    --accent-light: #D8F3DC;
+    --warn: #E07A5F;
+    --warn-light: #FDE8E3;
+    --amber: #D4870A;
+    --amber-light: #FFF3CD;
+    --border: #E2DDD8;
+    --purple: #5C4B8A;
+    --purple-light: #EDE9F8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  .container { max-width: 680px; margin: 0 auto; }
+
+  /* Screens */
+  .screen { display: none; animation: fadeUp 0.5s ease both; }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Header */
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+
+  .tag-pre { color: var(--purple); background: var(--purple-light); }
+  .tag-post { color: var(--accent); background: var(--accent-light); }
+  .tag-result { color: var(--amber); background: var(--amber-light); }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(26px, 4vw, 36px);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 32px;
+  }
+
+  .dot {
+    height: 6px;
+    border-radius: 99px;
+    background: var(--border);
+    transition: all 0.3s;
+    flex: 1;
+  }
+
+  .dot.active { background: var(--purple); }
+  .dot.done-pre { background: var(--purple); }
+  .dot.done-post { background: var(--accent); }
+
+  /* Question card */
+  .question-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .q-number {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 10px;
+  }
+
+  .q-text {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 18px;
+    color: var(--ink);
+  }
+
+  /* Confidence scale */
+  .scale-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 10px;
+  }
+
+  .scale {
+    display: flex;
+    gap: 8px;
+  }
+
+  .scale-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: var(--ink-light);
+    max-width: 68px;
+  }
+
+  .scale-btn span.hint {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--ink-light);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .scale-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .scale-btn.selected-1 { background: var(--warn-light); border-color: var(--warn); color: var(--warn); }
+  .scale-btn.selected-2 { background: #FFF3CD; border-color: #F0B429; color: #78500A; }
+  .scale-btn.selected-3 { background: #FFF8E1; border-color: #D4A017; color: #6B4800; }
+  .scale-btn.selected-4 { background: #E8F5E9; border-color: #4CAF50; color: #1B5E20; }
+  .scale-btn.selected-5 { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+  /* Nav buttons */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 22px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #235C40; transform: translateY(-1px); }
+  .btn-primary:disabled { background: var(--border); color: var(--ink-light); cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-light);
+    border: 1.5px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--ink-light); color: var(--ink); }
+
+  .btn-purple { background: var(--purple); color: white; }
+  .btn-purple:hover { background: #4A3A6E; }
+
+  /* ── RESULTS ── */
+  .results-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .growth-banner {
+    background: var(--accent-light);
+    border: 1.5px solid var(--accent);
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .growth-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 52px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .growth-label {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Comparison rows */
+  .comparison-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+
+  .comparison-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .comparison-row {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+
+  .comparison-q {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .bar-label {
+    font-size: 11px;
+    font-weight: 600;
+    width: 42px;
+    flex-shrink: 0;
+    color: var(--ink-light);
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--bg);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .bar-fill-pre { background: var(--purple); }
+  .bar-fill-post { background: var(--accent); }
+
+  .bar-score {
+    font-size: 12px;
+    font-weight: 600;
+    width: 24px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .delta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-top: 4px;
+  }
+
+  .delta-up { background: var(--accent-light); color: var(--accent); }
+  .delta-same { background: var(--amber-light); color: var(--amber); }
+  .delta-down { background: var(--warn-light); color: var(--warn); }
+
+  /* Reflection */
+  .reflection-box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-bottom: 24px;
+  }
+
+  .reflection-box label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .reflection-box textarea {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    line-height: 1.55;
+    transition: border-color 0.2s;
+  }
+
+  .reflection-box textarea:focus { border-color: var(--accent); }
+
+  /* Actions */
+  .result-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* Interstitial */
+  .interstitial {
+    background: var(--surface);
+    border: 1.5px solid var(--accent);
+    border-radius: 14px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .interstitial-icon { font-size: 40px; margin-bottom: 12px; }
+
+  .interstitial h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .interstitial p {
+    font-size: 14px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    max-width: 440px;
+    margin: 0 auto 20px;
+  }
+
+  /* Welcome */
+  .welcome-box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .phase-card {
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .phase-card.pre { background: var(--purple-light); }
+  .phase-card.post { background: var(--accent-light); }
+
+  .phase-card .phase-icon { font-size: 20px; margin-bottom: 6px; }
+  .phase-card .phase-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+  .phase-card .phase-desc { font-size: 11px; color: var(--ink-light); line-height: 1.4; }
+
+  .footer-note {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--ink-light);
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── SCREEN: WELCOME ── -->
+  <div class="screen active" id="screen-welcome">
+    <div class="tag tag-pre">Knowledge Check</div>
+    <h1>How much do you already know?</h1>
+    <p class="subtitle">This short check takes 3 minutes before the module and 3 minutes after. At the end, you'll see exactly how your confidence changed — question by question.</p>
+
+    <div class="welcome-box">
+      <p style="font-size:14px; line-height:1.6; color:var(--ink);">Rate your confidence on 5 questions <strong>before</strong> you start the module. Once you complete all four units, come back and rate them again. Your before and after scores will be shown side by side.</p>
+      <div class="two-col">
+        <div class="phase-card pre">
+          <div class="phase-icon">🔍</div>
+          <div class="phase-title" style="color:var(--purple)">Before the module</div>
+          <div class="phase-desc">Honest gut check — no right or wrong answers</div>
+        </div>
+        <div class="phase-card post">
+          <div class="phase-icon">✓</div>
+          <div class="phase-title" style="color:var(--accent)">After the module</div>
+          <div class="phase-desc">Same questions — see how your thinking shifted</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-purple" onclick="startPre()">Begin Pre-Check →</button>
+  </div>
+
+  <!-- ── SCREEN: PRE CHECK ── -->
+  <div class="screen" id="screen-pre">
+    <div class="tag tag-pre">Before the Module</div>
+    <h1>Pre-Check</h1>
+    <p class="subtitle">Rate your confidence honestly — 1 = not confident at all, 5 = very confident. There are no wrong answers here.</p>
+
+    <div class="progress-dots" id="dots-pre"></div>
+    <div id="question-area-pre"></div>
+
+    <div class="nav">
+      <button class="btn btn-ghost" id="btn-prev-pre" onclick="prevQ('pre')" style="visibility:hidden">← Back</button>
+      <button class="btn btn-primary" id="btn-next-pre" onclick="nextQ('pre')" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: INTERSTITIAL ── -->
+  <div class="screen" id="screen-interstitial">
+    <div class="interstitial">
+      <div class="interstitial-icon">🌱</div>
+      <h2>Pre-check saved</h2>
+      <p>Your starting point is recorded. Now go through the four units of the module. When you're done, come back here and click the button below to complete your post-check.</p>
+      <button class="btn btn-primary" onclick="startPost()">I've finished the module — start post-check →</button>
+    </div>
+    <p style="font-size:13px; color:var(--ink-light); text-align:center;">You can close this tab and return later. Your pre-check scores are saved in this browser session.</p>
+  </div>
+
+  <!-- ── SCREEN: POST CHECK ── -->
+  <div class="screen" id="screen-post">
+    <div class="tag tag-post">After the Module</div>
+    <h1>Post-Check</h1>
+    <p class="subtitle">The same 5 questions. Rate your confidence now — after completing the module.</p>
+
+    <div class="progress-dots" id="dots-post"></div>
+    <div id="question-area-post"></div>
+
+    <div class="nav">
+      <button class="btn btn-ghost" id="btn-prev-post" onclick="prevQ('post')" style="visibility:hidden">← Back</button>
+      <button class="btn btn-primary" id="btn-next-post" onclick="nextQ('post')" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: RESULTS ── -->
+  <div class="screen" id="screen-results">
+    <div class="tag tag-result">Your Results</div>
+    <h1>Here's how you grew</h1>
+    <p class="subtitle">Your confidence scores before and after the module, question by question.</p>
+
+    <div class="growth-banner">
+      <div class="growth-number" id="avg-growth">+0</div>
+      <div class="growth-label">average confidence gain across all 5 questions</div>
+    </div>
+
+    <div class="comparison-title">Question-by-question breakdown</div>
+    <div class="comparison-list" id="comparison-list"></div>
+
+    <div class="reflection-box">
+      <label>Final reflection: What is one concrete thing you will do differently in your venture within the next 30 days?</label>
+      <textarea id="reflection-text" placeholder="Write your commitment here…"></textarea>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="exportResults()">↓ Export My Results</button>
+      <button class="btn btn-ghost" onclick="resetAll()">↺ Start Over</button>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <strong>Your privacy:</strong> Nothing you enter is stored or shared. All data lives in your browser session only.
+    <br><br>
+    Part of the <em>Strategic AI Integration</em> self-learning module · ERUA Social Entrepreneurship Lab · Prepared by Mariam Umar Farooq
+  </div>
+
+</div>
+
+<script>
+  const questions = [
+    {
+      id: 'q1',
+      text: 'I can explain the difference between AI hype and a genuinely useful AI application for my venture.'
+    },
+    {
+      id: 'q2',
+      text: 'I can identify which functions in my venture are good candidates for AI — and which are not.'
+    },
+    {
+      id: 'q3',
+      text: 'I know how to design and run a focused AI pilot with clear success criteria.'
+    },
+    {
+      id: 'q4',
+      text: 'I understand the main risks of using AI in a social venture context and how to mitigate them.'
+    },
+    {
+      id: 'q5',
+      text: 'I can evaluate any AI tool against ethical and legal criteria before adopting it for my team.'
+    }
+  ];
+
+  const scaleLabels = ['', 'Not at all', 'Slightly', 'Somewhat', 'Mostly', 'Fully confident'];
+
+  const state = {
+    pre: [0, 0, 0, 0, 0],
+    post: [0, 0, 0, 0, 0],
+    currentQ: { pre: 0, post: 0 }
+  };
+
+  // ── RENDER QUESTION ──
+  function renderQuestion(phase) {
+    const i = state.currentQ[phase];
+    const q = questions[i];
+    const area = document.getElementById('question-area-' + phase);
+    const current = state[phase][i];
+
+    area.innerHTML = `
+      <div class="question-card">
+        <div class="q-number">Question ${i + 1} of ${questions.length}</div>
+        <div class="q-text">${q.text}</div>
+        <div class="scale-label">Your confidence level</div>
+        <div class="scale">
+          ${[1,2,3,4,5].map(n => `
+            <button class="scale-btn ${current === n ? 'selected-'+n : ''}"
+              onclick="selectScore('${phase}', ${i}, ${n})"
+              title="${scaleLabels[n]}">
+              ${n}
+              <span class="hint">${n === 1 ? 'Not at all' : n === 5 ? 'Fully' : ''}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    // Update dots
+    const dotsEl = document.getElementById('dots-' + phase);
+    dotsEl.innerHTML = questions.map((_, idx) => {
+      let cls = 'dot';
+      if (idx < i) cls += ' done-' + phase;
+      if (idx === i) cls += ' active';
+      return `<div class="${cls}"></div>`;
+    }).join('');
+
+    // Update nav
+    const prevBtn = document.getElementById('btn-prev-' + phase);
+    const nextBtn = document.getElementById('btn-next-' + phase);
+    prevBtn.style.visibility = i === 0 ? 'hidden' : 'visible';
+
+    const isLast = i === questions.length - 1;
+    nextBtn.textContent = isLast ? (phase === 'pre' ? 'Save & start module →' : 'See my results →') : 'Next →';
+    nextBtn.disabled = current === 0;
+  }
+
+  function selectScore(phase, qIdx, score) {
+    state[phase][qIdx] = score;
+    renderQuestion(phase);
+  }
+
+  function nextQ(phase) {
+    const i = state.currentQ[phase];
+    if (state[phase][i] === 0) return;
+    if (i < questions.length - 1) {
+      state.currentQ[phase]++;
+      renderQuestion(phase);
+    } else {
+      // Done
+      if (phase === 'pre') {
+        showScreen('screen-interstitial');
+      } else {
+        showResults();
+      }
+    }
+  }
+
+  function prevQ(phase) {
+    if (state.currentQ[phase] > 0) {
+      state.currentQ[phase]--;
+      renderQuestion(phase);
+    }
+  }
+
+  // ── SCREENS ──
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function startPre() {
+    state.currentQ.pre = 0;
+    showScreen('screen-pre');
+    renderQuestion('pre');
+  }
+
+  function startPost() {
+    state.currentQ.post = 0;
+    showScreen('screen-post');
+    renderQuestion('post');
+  }
+
+  // ── RESULTS ──
+  function showResults() {
+    showScreen('screen-results');
+
+    const pre = state.pre;
+    const post = state.post;
+
+    // Average growth
+    const totalGrowth = post.reduce((sum, v, i) => sum + (v - pre[i]), 0);
+    const avgGrowth = totalGrowth / questions.length;
+    const avgEl = document.getElementById('avg-growth');
+    avgEl.textContent = (avgGrowth >= 0 ? '+' : '') + avgGrowth.toFixed(1);
+    avgEl.style.color = avgGrowth > 0 ? 'var(--accent)' : avgGrowth < 0 ? 'var(--warn)' : 'var(--amber)';
+
+    // Comparison rows
+    const list = document.getElementById('comparison-list');
+    list.innerHTML = questions.map((q, i) => {
+      const delta = post[i] - pre[i];
+      let deltaClass = delta > 0 ? 'delta-up' : delta < 0 ? 'delta-down' : 'delta-same';
+      let deltaText = delta > 0 ? `↑ +${delta} gain` : delta < 0 ? `↓ ${delta}` : '→ No change';
+
+      return `
+        <div class="comparison-row">
+          <div class="comparison-q">${q.text}</div>
+          <div class="bar-row">
+            <span class="bar-label" style="color:var(--purple)">Before</span>
+            <div class="bar-track">
+              <div class="bar-fill bar-fill-pre" style="width:${pre[i]/5*100}%"></div>
+            </div>
+            <span class="bar-score" style="color:var(--purple)">${pre[i]}/5</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label" style="color:var(--accent)">After</span>
+            <div class="bar-track">
+              <div class="bar-fill bar-fill-post" style="width:${post[i]/5*100}%"></div>
+            </div>
+            <span class="bar-score" style="color:var(--accent)">${post[i]}/5</span>
+          </div>
+          <span class="delta-badge ${deltaClass}">${deltaText}</span>
+        </div>
+      `;
+    }).join('');
+
+    // Animate bars
+    setTimeout(() => {
+      document.querySelectorAll('.bar-fill').forEach(b => {
+        const w = b.style.width;
+        b.style.width = '0%';
+        setTimeout(() => { b.style.width = w; }, 50);
+      });
+    }, 100);
+  }
+
+  // ── EXPORT ──
+  function exportResults() {
+    const pre = state.pre;
+    const post = state.post;
+    const reflection = document.getElementById('reflection-text').value.trim();
+
+    let text = 'KNOWLEDGE CHECK RESULTS\n';
+    text += `Strategic AI Integration — ERUA Social Entrepreneurship Lab\n`;
+    text += `Date: ${new Date().toLocaleDateString('en-GB')}\n\n`;
+    text += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+    questions.forEach((q, i) => {
+      const delta = post[i] - pre[i];
+      const sign = delta >= 0 ? '+' : '';
+      text += `Q${i+1}: ${q.text}\n`;
+      text += `  Before: ${pre[i]}/5   After: ${post[i]}/5   Change: ${sign}${delta}\n\n`;
+    });
+
+    const totalGrowth = post.reduce((s,v,i) => s + (v - pre[i]), 0);
+    text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    text += `Average confidence gain: ${totalGrowth >= 0 ? '+' : ''}${(totalGrowth/5).toFixed(1)} per question\n\n`;
+
+    if (reflection) {
+      text += `MY COMMITMENT (next 30 days):\n${reflection}\n\n`;
+    }
+
+    text += `Part of the Strategic AI Integration module · ERUA Social Entrepreneurship Lab\n`;
+    text += `Prepared by Mariam Umar Farooq\n`;
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Knowledge-Check-${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+  }
+
+  function resetAll() {
+    if (!confirm('Reset all your responses and start over?')) return;
+    state.pre = [0,0,0,0,0];
+    state.post = [0,0,0,0,0];
+    state.currentQ = { pre: 0, post: 0 };
+    showScreen('screen-welcome');
+  }
+</script>
+</body>
+</html>
