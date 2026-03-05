@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ethical AI Checklist — ERUA Social Entrepreneurship Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF;
+    --surface: #FFFFFF;
+    --ink: #1A1A1A;
+    --ink-light: #6B6560;
+    --accent: #2D6A4F;
+    --accent-light: #D8F3DC;
+    --warn: #E07A5F;
+    --warn-light: #FDE8E3;
+    --border: #E2DDD8;
+    --progress-empty: #E2DDD8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+  /* Tool name input */
+  .tool-input-section {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .tool-input-section label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 8px;
+  }
+
+  .tool-input-section input {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--ink);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 6px;
+    transition: border-color 0.2s;
+  }
+
+  .tool-input-section input:focus {
+    border-color: var(--accent);
+  }
+
+  .tool-input-section input::placeholder {
+    color: #C5BFB9;
+    font-weight: 400;
+  }
+
+  /* Progress bar */
+  .progress-section {
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+  }
+
+  .progress-count {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--accent);
+  }
+
+  .progress-bar-track {
+    height: 6px;
+    background: var(--progress-empty);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Checklist */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .check-item {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    animation: fadeUp 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .check-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(45, 106, 79, 0.08);
+  }
+
+  .check-item.checked {
+    border-color: var(--accent);
+    background: #FAFFFE;
+  }
+
+  .check-item.flagged {
+    border-color: var(--warn);
+    background: #FFFAF9;
+  }
+
+  .check-item.checked::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 3px 0 0 3px;
+  }
+
+  .check-item.flagged::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--warn);
+    border-radius: 3px 0 0 3px;
+  }
+
+  /* Custom checkbox */
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    margin-top: 1px;
+  }
+
+  .check-item.checked .checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .check-item.flagged .checkbox {
+    background: var(--warn);
+    border-color: var(--warn);
+  }
+
+  .checkbox svg {
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .check-item.checked .checkbox svg,
+  .check-item.flagged .checkbox svg {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .check-content {
+    flex: 1;
+  }
+
+  .check-number {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 4px;
+  }
+
+  .check-category {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .check-item.flagged .check-category {
+    color: var(--warn);
+  }
+
+  .check-text {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  .check-item.checked .check-text {
+    color: var(--ink-light);
+  }
+
+  /* Flag button */
+  .flag-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .flag-btn:hover {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .check-item.flagged .flag-btn {
+    background: var(--warn-light);
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  /* Notes area */
+  .notes-area {
+    margin-top: 10px;
+    display: none;
+  }
+
+  .notes-area.visible {
+    display: block;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .notes-area textarea {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--warn-light);
+    border: 1px solid #F0C9BF;
+    border-radius: 6px;
+    padding: 10px 12px;
+    resize: vertical;
+    min-height: 60px;
+    outline: none;
+    line-height: 1.5;
+  }
+
+  .notes-area textarea::placeholder {
+    color: #C5A89F;
+  }
+
+  .notes-area textarea:focus {
+    border-color: var(--warn);
+  }
+
+  /* Results panel */
+  .result-panel {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: none;
+    animation: fadeUp 0.4s ease both;
+    margin-bottom: 20px;
+  }
+
+  .result-panel.visible {
+    display: block;
+  }
+
+  .result-panel.all-clear {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .result-panel.has-flags {
+    border-color: var(--warn);
+    background: var(--warn-light);
+  }
+
+  .result-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .result-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #235C40;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink-light);
+    border: 1.5px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--ink-light);
+    color: var(--ink);
+  }
+
+  /* Footer note */
+  .footer-note {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--ink-light);
+    line-height: 1.6;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .check-item:nth-child(1) { animation-delay: 0.05s; }
+  .check-item:nth-child(2) { animation-delay: 0.10s; }
+  .check-item:nth-child(3) { animation-delay: 0.15s; }
+  .check-item:nth-child(4) { animation-delay: 0.20s; }
+  .check-item:nth-child(5) { animation-delay: 0.25s; }
+  .check-item:nth-child(6) { animation-delay: 0.30s; }
+  .check-item:nth-child(7) { animation-delay: 0.35s; }
+  .check-item:nth-child(8) { animation-delay: 0.40s; }
+
+  @media (max-width: 480px) {
+    .flag-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="tag">Unit 4 · Ethics & Risk</div>
+    <h1>Ethical AI Checklist</h1>
+    <p class="subtitle">Run any AI tool through these 8 questions before adopting it for your venture. Your responses are yours alone — nothing is shared or stored.</p>
+  </div>
+
+  <div class="tool-input-section">
+    <label>Which tool are you evaluating?</label>
+    <input type="text" id="toolName" placeholder="e.g. ChatGPT, Notion AI, Claude…" oninput="updateToolName()">
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-meta">
+      <span class="progress-label">Your progress</span>
+      <span class="progress-count" id="progressCount">0 / 8</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="checklist" id="checklist">
+
+    <div class="check-item" id="item-0" onclick="toggle(0)">
+      <div class="checkbox" id="box-0">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="check-content">
+        <div class="check-number">01</div>
+        <div class="check-category">Data Retention</div>
+        <div class="check-text">I know what data this tool collects, how it is stored, and how long it is retained.</div>
+        <div class="notes-area" id="notes-0">
+          <textarea placeholder="Note what you need to investigate further…" onclick="event.stopPropagation()" oninput="saveNote(0, this.value)"></textarea>
+        </div>
+      </div>
+      <button class="flag-btn" id="flag-0" onclick="flag(event, 0)">⚑ Flag</button>
+    </div>
+
+    <div class="check-item" id="item-1" onclick="toggle(1)">
+      <div class="checkbox" id="box-1">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="check-content">
+        <div class="check-number">02</div>
+        <div class="check-category">GDPR Compliance</div>
+        <div class="check-text">This tool is GDPR-compliant, or I have confirmed it is safe to use in the EU context.</div>
+        <div class="notes-area" id="notes-1">
+          <textarea placeholder="Note what you need to investigate further…" onclick="event.stopPropagation()" oninput="saveNote(1, this.value)"></textarea>
+        </div>
+      </div>
+      <button class="flag-btn" id="flag-1" onclick="flag(event, 1)">⚑ Flag</button>
+    </div>
+
+    <div class="check-item" id="item-2" onclick="toggle(2)">
+      <div class="checkbox" id="box-2">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="check-content">
+        <div class="check-number">03</div>
+        <div class="check-category">Beneficiary Data</div>
+        <div class="check-text">I will not input identifiable beneficiary or client information into this tool without explicit consent and legal basis.</div>
+        <div class="notes-area" id="notes-2">
+          <textarea placeholder="Note what you need to investigate further…" onclick="event.stopPropagation()" oninput="saveNote(2, this.value)"></textarea>
+        </div>
+      </div>
+      <button class="flag-btn" id="flag-2" onclick="flag(event, 2)">⚑ Flag</button>
+    </div>
+
+    <div class="check-item" id="item-3" onclick="toggle(3)">
+      <div class="checkbox" id="box-3">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="check-content">
+        <div class="check-number">04</div>
+        <div class="check-category">Bias Check</div>
+        <div class="check-text">I have reviewed sample outputs for cultural assumptions, language bias, or blind spots relevant to my community.</div>
+        <div class="notes-area" id="notes-3">
+          <textarea placeholder="Note what you need to investigate further…" onclick="event.stopPropagation()" oninput="saveNote(3, this.value)"></textarea>
+        </div>
+      </div>
+      <button class="flag-btn" id="flag-3" onclick="flag(event, 3)">⚑ Flag</button>
+    </div>
+
+    <div class="check-item" id="item-4" onclick="toggle(4)">
+      <div class="checkbox" id="box-4">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="check-content">
+        <div class="check-number">05</div>
+        <div class="check-category">Human Review</div>
+        <div class="check-text">There is always a human reviewing AI outputs before they reach beneficiaries, donors, or the public.</div>
+        <div class="notes-area" id="notes-4">
+          <textarea placeholder="Note what you need to investigate further…" onclick="event.stopPropagation()" oninput="saveNote(4, this.value)"></textarea>
+        </div>
+      </div>
+      <button class="flag-btn" id="flag-4" onclick="flag(event, 4)">⚑ Flag</button>
+    </div>
+
+    <div class="check-item" id="item-5" onclick="toggle(5)">
+      <div class="checkbox" id="box-5">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="check-content">
+        <div class="check-number">06</div>
+        <div class="check-category">Mission Test</div>
+        <div class="check-text">Using this tool does not replace a human interaction where the relationship itself is the value.</div>
+        <div class="notes-area" id="notes-5">
+          <textarea placeholder="Note what you need to investigate further…" onclick="event.stopPropagation()" oninput="saveNote(5, this.value)"></textarea>
+        </div>
+      </div>
+      <button class="flag-btn" id="flag-5" onclick="flag(event, 5)">⚑ Flag</button>
+    </div>
+
+    <div class="check-item" id="item-6" onclick="toggle(6)">
+      <div class="checkbox" id="box-6">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="check-content">
+        <div class="check-number">07</div>
+        <div class="check-category">Fallback Plan</div>
+        <div class="check-text">If this tool became unavailable tomorrow, I have a way to continue the work without it.</div>
+        <div class="notes-area" id="notes-6">
+          <textarea placeholder="Note what you need to investigate further…" onclick="event.stopPropagation()" oninput="saveNote(6, this.value)"></textarea>
+        </div>
+      </div>
+      <button class="flag-btn" id="flag-6" onclick="flag(event, 6)">⚑ Flag</button>
+    </div>
+
+    <div class="check-item" id="item-7" onclick="toggle(7)">
+      <div class="checkbox" id="box-7">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="check-content">
+        <div class="check-number">08</div>
+        <div class="check-category">Team Awareness</div>
+        <div class="check-text">The people using this tool understand its limitations — not just its capabilities.</div>
+        <div class="notes-area" id="notes-7">
+          <textarea placeholder="Note what you need to investigate further…" onclick="event.stopPropagation()" oninput="saveNote(7, this.value)"></textarea>
+        </div>
+      </div>
+      <button class="flag-btn" id="flag-7" onclick="flag(event, 7)">⚑ Flag</button>
+    </div>
+
+  </div>
+
+  <!-- Result panel -->
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title" id="resultTitle"></div>
+    <p class="result-text" id="resultText"></p>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn btn-primary" onclick="exportSummary()">↓ Export My Summary</button>
+    <button class="btn btn-secondary" onclick="resetAll()">↺ Start Over</button>
+  </div>
+
+  <div class="footer-note">
+    <strong>Your privacy:</strong> Nothing you enter here is stored, shared, or sent anywhere. This checklist lives entirely in your browser. Refreshing the page resets it.
+    <br><br>
+    Part of the <em>Strategic AI Integration</em> self-learning module · ERUA Social Entrepreneurship Lab · Prepared by Mariam Umar Farooq
+  </div>
+
+</div>
+
+<script>
+  const state = {
+    checked: new Array(8).fill(false),
+    flagged: new Array(8).fill(false),
+    notes: new Array(8).fill(''),
+    toolName: ''
+  };
+
+  function updateToolName() {
+    state.toolName = document.getElementById('toolName').value;
+  }
+
+  function toggle(i) {
+    state.checked[i] = !state.checked[i];
+    // If unchecking, also unflag
+    if (!state.checked[i]) {
+      state.flagged[i] = false;
+    }
+    render(i);
+    updateProgress();
+  }
+
+  function flag(e, i) {
+    e.stopPropagation();
+    state.flagged[i] = !state.flagged[i];
+    if (state.flagged[i]) {
+      state.checked[i] = false; // flagged means "needs investigation" not "checked"
+    }
+    render(i);
+    updateProgress();
+  }
+
+  function saveNote(i, val) {
+    state.notes[i] = val;
+  }
+
+  function render(i) {
+    const item = document.getElementById('item-' + i);
+    const box = document.getElementById('box-' + i);
+    const flagBtn = document.getElementById('flag-' + i);
+    const notes = document.getElementById('notes-' + i);
+
+    item.classList.toggle('checked', state.checked[i]);
+    item.classList.toggle('flagged', state.flagged[i]);
+
+    // Change icon for flagged
+    const svg = box.querySelector('svg path');
+    if (state.flagged[i]) {
+      svg.setAttribute('d', 'M6 1v5M6 9v.5'); // exclamation-like
+      box.querySelector('svg').innerHTML = '<text x="3" y="9" font-size="10" fill="white" font-family="sans-serif">!</text>';
+    } else {
+      box.querySelector('svg').innerHTML = '<path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+
+    flagBtn.textContent = state.flagged[i] ? '⚑ Flagged' : '⚑ Flag';
+    notes.classList.toggle('visible', state.flagged[i]);
+  }
+
+  function updateProgress() {
+    const done = state.checked.filter(Boolean).length;
+    const flags = state.flagged.filter(Boolean).length;
+    const total = done + flags;
+
+    document.getElementById('progressCount').textContent = done + ' / 8';
+    document.getElementById('progressFill').style.width = (done / 8 * 100) + '%';
+
+    const panel = document.getElementById('resultPanel');
+    const title = document.getElementById('resultTitle');
+    const text = document.getElementById('resultText');
+    const tool = state.toolName || 'this tool';
+
+    if (done === 8) {
+      panel.className = 'result-panel visible all-clear';
+      title.textContent = '✓ All clear — ready to pilot';
+      text.textContent = `You've confirmed all 8 criteria for ${tool}. You're ready to run your pilot (Unit 3). Keep this checklist on file and revisit it if the tool updates its terms or your use case changes.`;
+    } else if (flags > 0 && done + flags === 8) {
+      panel.className = 'result-panel visible has-flags';
+      title.textContent = `${flags} item${flags > 1 ? 's' : ''} need investigation`;
+      text.textContent = `Before piloting ${tool}, look into the flagged items above. "I don't know yet" is a valid answer — it tells you exactly where your due diligence needs to go. Assign each flagged item to a named person before you proceed.`;
+    } else if (done > 0 || flags > 0) {
+      panel.className = 'result-panel';
+      panel.style.display = 'none';
+    } else {
+      panel.className = 'result-panel';
+      panel.style.display = 'none';
+    }
+  }
+
+  function exportSummary() {
+    const tool = state.toolName || '[Tool name not entered]';
+    const labels = ['Data Retention','GDPR Compliance','Beneficiary Data','Bias Check','Human Review','Mission Test','Fallback Plan','Team Awareness'];
+    let text = `ETHICAL AI CHECKLIST SUMMARY\n`;
+    text += `Tool evaluated: ${tool}\n`;
+    text += `Date: ${new Date().toLocaleDateString('en-GB')}\n\n`;
+    text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+    state.checked.forEach((c, i) => {
+      const status = c ? '✓ Confirmed' : state.flagged[i] ? '⚑ Needs investigation' : '○ Not reviewed';
+      text += `${String(i+1).padStart(2,'0')}. ${labels[i]}\n    ${status}\n`;
+      if (state.notes[i]) text += `    Note: ${state.notes[i]}\n`;
+      text += '\n';
+    });
+
+    const confirmed = state.checked.filter(Boolean).length;
+    const flagged = state.flagged.filter(Boolean).length;
+    text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    text += `Result: ${confirmed}/8 confirmed · ${flagged} flagged for investigation\n\n`;
+    text += `Part of the Strategic AI Integration module · ERUA Social Entrepreneurship Lab\n`;
+    text += `Prepared by Mariam Umar Farooq\n`;
+
+    try {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `AI-Checklist-${tool.replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch(e) {
+      const encoded = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+      const a = document.createElement('a');
+      a.href = encoded;
+      a.download = `AI-Checklist-${tool.replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.txt`;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
+
+  function resetAll() {
+    if (!confirm('Reset all your responses?')) return;
+    state.checked.fill(false);
+    state.flagged.fill(false);
+    state.notes.fill('');
+    for (let i = 0; i < 8; i++) {
+      const item = document.getElementById('item-' + i);
+      item.classList.remove('checked','flagged');
+      const box = document.getElementById('item-' + i).querySelector('.checkbox svg');
+      box.innerHTML = '<path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+      document.getElementById('flag-' + i).textContent = '⚑ Flag';
+      document.getElementById('notes-' + i).classList.remove('visible');
+      const ta = document.getElementById('notes-' + i).querySelector('textarea');
+      if (ta) ta.value = '';
+    }
+    document.getElementById('progressCount').textContent = '0 / 8';
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('resultPanel').className = 'result-panel';
+    document.getElementById('toolName').value = '';
+    state.toolName = '';
+  }
+</script>
+</body>
+</html>
